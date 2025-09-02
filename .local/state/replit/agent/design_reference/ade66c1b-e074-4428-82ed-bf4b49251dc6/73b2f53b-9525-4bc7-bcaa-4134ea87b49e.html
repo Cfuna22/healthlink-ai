@@ -1,0 +1,621 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthLink AI - Smart Community Health Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    popover: {
+                        DEFAULT: "var(--popover)",
+                        foreground: "var(--popover-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                    success: "var(--success)",
+                    warning: "var(--warning)"
+                },
+                fontFamily: {
+                    sans: ["Inter", "system-ui", "sans-serif"],
+                }
+            },
+        }
+    };
+    </script>
+    <style>
+        :root {
+            --background: hsl(210 40% 98%);
+            --foreground: hsl(222.2 84% 4.9%);
+            --card: hsl(0 0% 100%);
+            --card-foreground: hsl(222.2 84% 4.9%);
+            --popover: hsl(0 0% 100%);
+            --popover-foreground: hsl(222.2 84% 4.9%);
+            --primary: hsl(213 76% 44%);
+            --primary-foreground: hsl(0 0% 98%);
+            --secondary: hsl(174 100% 20%);
+            --secondary-foreground: hsl(0 0% 98%);
+            --muted: hsl(210 40% 96%);
+            --muted-foreground: hsl(215.4 16.3% 46.9%);
+            --accent: hsl(32 100% 50%);
+            --accent-foreground: hsl(0 0% 98%);
+            --destructive: hsl(0 84% 60%);
+            --destructive-foreground: hsl(0 0% 98%);
+            --border: hsl(214.3 31.8% 91.4%);
+            --input: hsl(214.3 31.8% 91.4%);
+            --ring: hsl(213 76% 44%);
+            --success: hsl(122 39% 49%);
+            --warning: hsl(32 95% 44%);
+            --radius: 0.75rem;
+            --font-sans: "Inter";
+        }
+        
+        .health-gradient {
+            background: linear-gradient(135deg, hsl(213 76% 44%) 0%, hsl(174 100% 20%) 100%);
+        }
+        
+        .floating-card {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        /* Custom scrollbar for health logs */
+        .health-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .health-scroll::-webkit-scrollbar-track {
+            background: hsl(210 40% 96%);
+        }
+        
+        .health-scroll::-webkit-scrollbar-thumb {
+            background: hsl(213 76% 44%);
+            border-radius: 2px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-background text-foreground font-sans">
+    <!-- @COMPONENT: AppContainer -->
+    <div class="min-h-screen bg-background">
+        
+        <!-- Header Section -->
+        <!-- @COMPONENT: Header -->
+        <header class="health-gradient text-primary-foreground p-4 sticky top-0 z-50">
+            <div class="max-w-md mx-auto flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-heartbeat text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">HealthLink AI</h1>
+                        <p class="text-sm opacity-90">Smart Health Assistant</p>
+                    </div>
+                </div>
+                <button class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center" data-event="click:toggleProfile">
+                    <i class="fas fa-user text-white"></i>
+                </button>
+            </div>
+        </header>
+        <!-- @END_COMPONENT: Header -->
+
+        <!-- Main Content -->
+        <main class="max-w-md mx-auto px-4 pb-20">
+            
+            <!-- Quick Stats Dashboard -->
+            <!-- @COMPONENT: QuickStats -->
+            <section class="py-6">
+                <h2 class="text-lg font-semibold mb-4 text-foreground">Today's Health Overview</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-card rounded-lg p-4 border floating-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-muted-foreground">Symptoms Logged</p>
+                                <p class="text-2xl font-bold text-foreground" data-bind="todaySymptoms">3</p>
+                            </div>
+                            <div class="w-10 h-10 bg-warning/10 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-thermometer-half text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-card rounded-lg p-4 border floating-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-muted-foreground">Health Score</p>
+                                <p class="text-2xl font-bold text-success" data-bind="healthScore">85</p>
+                            </div>
+                            <div class="w-10 h-10 bg-success/10 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-shield-alt text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- @END_COMPONENT: QuickStats -->
+
+            <!-- Symptom Checker Section -->
+            <!-- @COMPONENT: SymptomChecker -->
+            <section class="mb-8">
+                <div class="bg-card rounded-xl p-6 border floating-card">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-stethoscope text-primary text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-semibold text-foreground">Symptom Checker</h2>
+                            <p class="text-sm text-muted-foreground">AI-powered health assessment</p>
+                        </div>
+                    </div>
+                    
+                    <!-- @FUNCTIONALITY: Symptom input form with AI integration -->
+                    <form class="space-y-4" data-event="submit:handleSymptomSubmit">
+                        <!-- @STATE: symptoms:string[] = [] -->
+                        <div>
+                            <label for="symptoms" class="block text-sm font-medium text-foreground mb-2">
+                                Describe your symptoms
+                            </label>
+                            <textarea 
+                                id="symptoms" 
+                                rows="3" 
+                                class="w-full px-4 py-3 bg-input border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
+                                placeholder="e.g., headache, fever, sore throat..."
+                                data-mock="true"
+                                data-bind="symptomInput"
+                            ></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Severity</label>
+                                <select class="w-full px-4 py-3 bg-input border border-border rounded-lg focus:ring-2 focus:ring-ring" data-bind="severity">
+                                    <option>Mild</option>
+                                    <option>Moderate</option>
+                                    <option>Severe</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Duration</label>
+                                <select class="w-full px-4 py-3 bg-input border border-border rounded-lg focus:ring-2 focus:ring-ring" data-bind="duration">
+                                    <option>Hours</option>
+                                    <option>1-2 days</option>
+                                    <option>3-7 days</option>
+                                    <option>Over a week</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button 
+                            type="submit" 
+                            class="w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center space-x-2"
+                            data-implementation="Should validate symptoms and call AI API"
+                        >
+                            <i class="fas fa-brain"></i>
+                            <span>Analyze Symptoms</span>
+                        </button>
+                    </form>
+                    
+                    <!-- AI Analysis Result (Hidden by default) -->
+                    <!-- @STATE: analysisResult:object | null = null -->
+                    <div class="mt-4 p-4 bg-muted rounded-lg border-l-4 border-l-warning hidden" data-bind="analysisResult">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-warning/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fas fa-exclamation-triangle text-warning text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-foreground mb-1">AI Assessment</h4>
+                                <p class="text-sm text-muted-foreground" data-mock="true">
+                                    Based on your symptoms, you may have a common cold. Consider rest and hydration. 
+                                    Consult a healthcare provider if symptoms worsen.
+                                </p>
+                                <div class="mt-2 flex space-x-2">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-success/10 text-success">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Low Risk
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- @END_COMPONENT: SymptomChecker -->
+
+            <!-- Find Clinics Section -->
+            <!-- @COMPONENT: ClinicFinder -->
+            <section class="mb-8">
+                <div class="bg-card rounded-xl p-6 border floating-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-map-marker-alt text-secondary text-lg"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-semibold text-foreground">Find Clinics</h2>
+                                <p class="text-sm text-muted-foreground">Nearby healthcare providers</p>
+                            </div>
+                        </div>
+                        <button class="text-primary hover:text-primary/80" data-event="click:refreshLocation">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Map Container -->
+                    <!-- @FUNCTIONALITY: Google Maps integration for clinic locations -->
+                    <div class="bg-muted rounded-lg h-48 mb-4 relative overflow-hidden" data-implementation="Implement Google Maps API here">
+                        <!-- Placeholder map with mock clinic markers -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fas fa-map text-4xl text-primary mb-2"></i>
+                                <p class="text-sm text-muted-foreground">Map will load here</p>
+                                <p class="text-xs text-muted-foreground">Google Maps API integration</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Mock clinic markers -->
+                        <div class="absolute top-4 left-4 w-6 h-6 bg-destructive rounded-full flex items-center justify-center pulse-animation">
+                            <i class="fas fa-plus text-white text-xs"></i>
+                        </div>
+                        <div class="absolute bottom-6 right-8 w-6 h-6 bg-destructive rounded-full flex items-center justify-center">
+                            <i class="fas fa-plus text-white text-xs"></i>
+                        </div>
+                        <div class="absolute top-1/2 left-1/2 w-6 h-6 bg-destructive rounded-full flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2">
+                            <i class="fas fa-plus text-white text-xs"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Clinic List -->
+                    <!-- @MAP: nearbyClinicas.map(clinic => ( -->
+                    <div class="space-y-3" data-mock="true">
+                        <div class="flex items-center space-x-3 p-3 bg-muted rounded-lg" data-bind="clinics[0]">
+                            <div class="w-10 h-10 bg-destructive/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-hospital text-destructive"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-medium text-foreground">City General Hospital</h4>
+                                <p class="text-sm text-muted-foreground">0.8 miles • Open 24/7</p>
+                                <div class="flex items-center space-x-2 mt-1">
+                                    <div class="flex text-warning text-xs">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <span class="text-xs text-muted-foreground">4.8 (324)</span>
+                                </div>
+                            </div>
+                            <button class="text-primary hover:text-primary/80" data-event="click:navigateToClinic">
+                                <i class="fas fa-directions"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3 p-3 bg-muted rounded-lg" data-bind="clinics[1]">
+                            <div class="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user-md text-secondary"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-medium text-foreground">HealthCare Clinic</h4>
+                                <p class="text-sm text-muted-foreground">1.2 miles • Open until 8 PM</p>
+                                <div class="flex items-center space-x-2 mt-1">
+                                    <div class="flex text-warning text-xs">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                    </div>
+                                    <span class="text-xs text-muted-foreground">4.2 (156)</span>
+                                </div>
+                            </div>
+                            <button class="text-primary hover:text-primary/80" data-event="click:navigateToClinic">
+                                <i class="fas fa-directions"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </section>
+            <!-- @END_COMPONENT: ClinicFinder -->
+
+            <!-- Health Log Section -->
+            <!-- @COMPONENT: HealthLog -->
+            <section class="mb-8">
+                <div class="bg-card rounded-xl p-6 border floating-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-chart-line text-accent text-lg"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-semibold text-foreground">Health Log</h2>
+                                <p class="text-sm text-muted-foreground">Track your symptoms over time</p>
+                            </div>
+                        </div>
+                        <button class="text-primary hover:text-primary/80" data-event="click:viewFullLog">
+                            <i class="fas fa-external-link-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Recent Entries -->
+                    <!-- @MAP: healthLogs.slice(0, 3).map(log => ( -->
+                    <div class="space-y-3 health-scroll max-h-64 overflow-y-auto" data-mock="true">
+                        <div class="flex items-start space-x-3 p-3 bg-muted rounded-lg" data-bind="healthLogs[0]">
+                            <div class="w-2 h-2 bg-warning rounded-full mt-2 flex-shrink-0"></div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-medium text-foreground">Headache</h4>
+                                    <span class="text-xs text-muted-foreground">2 hours ago</span>
+                                </div>
+                                <p class="text-sm text-muted-foreground mt-1">
+                                    Mild headache with light sensitivity. Took ibuprofen.
+                                </p>
+                                <div class="flex items-center space-x-2 mt-2">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-warning/10 text-warning">
+                                        Mild
+                                    </span>
+                                    <span class="text-xs text-muted-foreground">Duration: 3 hours</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3 p-3 bg-muted rounded-lg" data-bind="healthLogs[1]">
+                            <div class="w-2 h-2 bg-success rounded-full mt-2 flex-shrink-0"></div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-medium text-foreground">Exercise</h4>
+                                    <span class="text-xs text-muted-foreground">Yesterday</span>
+                                </div>
+                                <p class="text-sm text-muted-foreground mt-1">
+                                    30-minute morning walk. Feeling energized and refreshed.
+                                </p>
+                                <div class="flex items-center space-x-2 mt-2">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-success/10 text-success">
+                                        Positive
+                                    </span>
+                                    <span class="text-xs text-muted-foreground">Mood: Excellent</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3 p-3 bg-muted rounded-lg" data-bind="healthLogs[2]">
+                            <div class="w-2 h-2 bg-destructive rounded-full mt-2 flex-shrink-0"></div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-medium text-foreground">Sore Throat</h4>
+                                    <span class="text-xs text-muted-foreground">2 days ago</span>
+                                </div>
+                                <p class="text-sm text-muted-foreground mt-1">
+                                    Persistent sore throat with difficulty swallowing. Drinking warm tea.
+                                </p>
+                                <div class="flex items-center space-x-2 mt-2">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-destructive/10 text-destructive">
+                                        Moderate
+                                    </span>
+                                    <span class="text-xs text-muted-foreground">Duration: 2 days</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                    
+                    <button class="w-full mt-4 py-2 text-primary hover:text-primary/80 text-sm font-medium flex items-center justify-center space-x-2" data-event="click:addHealthEntry">
+                        <i class="fas fa-plus"></i>
+                        <span>Add New Entry</span>
+                    </button>
+                </div>
+            </section>
+            <!-- @END_COMPONENT: HealthLog -->
+
+            <!-- Emergency Contacts -->
+            <!-- @COMPONENT: EmergencyContacts -->
+            <section class="mb-8">
+                <div class="bg-destructive/5 border border-destructive/20 rounded-xl p-6">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-12 h-12 bg-destructive/10 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-phone text-destructive text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-semibold text-foreground">Emergency</h2>
+                            <p class="text-sm text-muted-foreground">Quick access to emergency services</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="flex items-center justify-center space-x-2 bg-destructive text-destructive-foreground py-3 rounded-lg font-medium hover:bg-destructive/90 transition-colors" data-event="click:call911">
+                            <i class="fas fa-ambulance"></i>
+                            <span>Call 911</span>
+                        </button>
+                        <button class="flex items-center justify-center space-x-2 bg-card border border-border text-foreground py-3 rounded-lg font-medium hover:bg-muted transition-colors" data-event="click:callDoctor">
+                            <i class="fas fa-user-md"></i>
+                            <span>My Doctor</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+            <!-- @END_COMPONENT: EmergencyContacts -->
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <!-- @COMPONENT: BottomNavigation -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
+            <div class="max-w-md mx-auto px-4 py-2">
+                <div class="flex items-center justify-around">
+                    <button class="flex flex-col items-center space-y-1 py-2 px-3 text-primary" data-event="click:navigateHome">
+                        <i class="fas fa-home text-lg"></i>
+                        <span class="text-xs font-medium">Home</span>
+                    </button>
+                    <button class="flex flex-col items-center space-y-1 py-2 px-3 text-muted-foreground hover:text-primary" data-event="click:navigateSymptoms">
+                        <i class="fas fa-stethoscope text-lg"></i>
+                        <span class="text-xs font-medium">Symptoms</span>
+                    </button>
+                    <button class="flex flex-col items-center space-y-1 py-2 px-3 text-muted-foreground hover:text-primary" data-event="click:navigateClinics">
+                        <i class="fas fa-map-marker-alt text-lg"></i>
+                        <span class="text-xs font-medium">Clinics</span>
+                    </button>
+                    <button class="flex flex-col items-center space-y-1 py-2 px-3 text-muted-foreground hover:text-primary" data-event="click:navigateLogs">
+                        <i class="fas fa-chart-line text-lg"></i>
+                        <span class="text-xs font-medium">Logs</span>
+                    </button>
+                    <button class="flex flex-col items-center space-y-1 py-2 px-3 text-muted-foreground hover:text-primary" data-event="click:navigateProfile">
+                        <i class="fas fa-user text-lg"></i>
+                        <span class="text-xs font-medium">Profile</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <!-- @END_COMPONENT: BottomNavigation -->
+
+        <!-- Floating Action Button for Quick Symptom Entry -->
+        <!-- @COMPONENT: FloatingActionButton -->
+        <button class="fixed bottom-20 right-4 w-14 h-14 bg-accent text-accent-foreground rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-40" data-event="click:quickSymptomEntry">
+            <i class="fas fa-plus text-xl"></i>
+        </button>
+        <!-- @END_COMPONENT: FloatingActionButton -->
+
+    </div>
+    <!-- @END_COMPONENT: AppContainer -->
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        (function() {
+            'use strict';
+            
+            // Mock data for demonstration
+            const mockData = {
+                user: {
+                    name: "Sarah Johnson",
+                    healthScore: 85,
+                    todaySymptoms: 3
+                },
+                healthLogs: [
+                    {
+                        id: 1,
+                        type: "symptom",
+                        title: "Headache",
+                        description: "Mild headache with light sensitivity. Took ibuprofen.",
+                        severity: "mild",
+                        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+                        duration: "3 hours"
+                    },
+                    {
+                        id: 2,
+                        type: "positive",
+                        title: "Exercise",
+                        description: "30-minute morning walk. Feeling energized and refreshed.",
+                        mood: "excellent",
+                        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday
+                    },
+                    {
+                        id: 3,
+                        type: "symptom",
+                        title: "Sore Throat",
+                        description: "Persistent sore throat with difficulty swallowing. Drinking warm tea.",
+                        severity: "moderate",
+                        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+                        duration: "2 days"
+                    }
+                ],
+                nearbyClinicas: [
+                    {
+                        id: 1,
+                        name: "City General Hospital",
+                        distance: "0.8 miles",
+                        hours: "Open 24/7",
+                        rating: 4.8,
+                        reviewCount: 324,
+                        type: "hospital"
+                    },
+                    {
+                        id: 2,
+                        name: "HealthCare Clinic",
+                        distance: "1.2 miles",
+                        hours: "Open until 8 PM",
+                        rating: 4.2,
+                        reviewCount: 156,
+                        type: "clinic"
+                    }
+                ]
+            };
+            
+            // Initialize app
+            function initializeApp() {
+                console.log('HealthLink AI initialized');
+                console.log('Mock data loaded:', mockData);
+                
+                // TODO: Initialize real data binding
+                // TODO: Set up API connections
+                // TODO: Configure Google Maps
+                // TODO: Initialize AI service connections
+            }
+            
+            // Event handlers for demonstration
+            function handleSymptomSubmit(event) {
+                event.preventDefault();
+                console.log('Symptom analysis requested');
+                // TODO: Implement AI symptom analysis
+                // TODO: Call backend API
+                // TODO: Display results
+            }
+            
+            function handleLocationRefresh() {
+                console.log('Refreshing location and nearby clinicas');
+                // TODO: Get user location
+                // TODO: Call Google Maps API
+                // TODO: Update clinic list
+            }
+            
+            function handleQuickSymptomEntry() {
+                console.log('Quick symptom entry opened');
+                // TODO: Open modal or navigate to symptom form
+            }
+            
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initializeApp);
+            } else {
+                initializeApp();
+            }
+            
+        })();
+    </script>
+</body>
+</html>

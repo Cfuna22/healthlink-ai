@@ -1,0 +1,1014 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthLink AI - Smart Community Health Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    popover: {
+                        DEFAULT: "var(--popover)",
+                        foreground: "var(--popover-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                },
+                fontFamily: {
+                    sans: ["Inter", "system-ui", "sans-serif"],
+                }
+            },
+        }
+    };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --background: hsl(210 40% 98%);
+            --foreground: hsl(222.2 84% 4.9%);
+            --card: hsl(0 0% 100%);
+            --card-foreground: hsl(222.2 84% 4.9%);
+            --popover: hsl(0 0% 100%);
+            --popover-foreground: hsl(222.2 84% 4.9%);
+            --primary: hsl(221.2 83.2% 53.3%);
+            --primary-foreground: hsl(210 40% 98%);
+            --secondary: hsl(210 40% 96%);
+            --secondary-foreground: hsl(222.2 84% 4.9%);
+            --muted: hsl(210 40% 96%);
+            --muted-foreground: hsl(215.4 16.3% 46.9%);
+            --accent: hsl(158.1 64.4% 51.6%);
+            --accent-foreground: hsl(210 40% 98%);
+            --destructive: hsl(0 84.2% 60.2%);
+            --destructive-foreground: hsl(210 40% 98%);
+            --border: hsl(214.3 31.8% 91.4%);
+            --input: hsl(214.3 31.8% 91.4%);
+            --ring: hsl(221.2 83.2% 53.3%);
+            --radius: 8px;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+        }
+        
+        .glass-card {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .chat-bubble-user {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+        
+        .chat-bubble-ai {
+            background: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+        }
+        
+        .loading-dots {
+            animation: loading 1.4s infinite ease-in-out both;
+        }
+        
+        .loading-dots:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes loading {
+            0%, 80%, 100% { 
+                transform: scale(0);
+            } 40% { 
+                transform: scale(1);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="font-sans bg-background text-foreground">
+    <!-- @COMPONENT: Header [navigation and branding] -->
+    <header class="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-heartbeat text-2xl text-primary"></i>
+                        <span class="text-xl font-bold text-foreground" data-mock="true">HealthLink AI</span>
+                    </div>
+                </div>
+                
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="#symptoms" class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Symptoms</a>
+                    <a href="#chat" class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">AI Chat</a>
+                    <a href="#clinics" class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Find Clinics</a>
+                    <a href="#logs" class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Health Logs</a>
+                </nav>
+                
+                <div class="flex items-center space-x-4">
+                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                        Sign In
+                    </button>
+                    <button class="md:hidden p-2 text-muted-foreground hover:text-foreground">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <main class="flex-1">
+        <!-- @COMPONENT: Hero [main value proposition and CTA] -->
+        <section class="gradient-bg py-20 lg:py-32">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid gap-8 lg:grid-cols-2 lg:gap-16 items-center">
+                    <div class="space-y-6">
+                        <h1 class="text-4xl font-bold tracking-tight text-primary-foreground sm:text-5xl lg:text-6xl">
+                            Your Smart Health Assistant
+                        </h1>
+                        <p class="text-xl text-primary-foreground/90 max-w-2xl">
+                            Get AI-powered symptom analysis, find nearby clinics, and track your health journey with our comprehensive community health platform.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-background text-foreground hover:bg-background/90 h-12 px-8 py-3 text-base">
+                                Start Health Check
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                            <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-primary-foreground/20 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 h-12 px-8 py-3 text-base">
+                                <i class="fas fa-play mr-2"></i>
+                                Watch Demo
+                            </button>
+                        </div>
+                    </div>
+                    <div class="lg:text-center">
+                        <!-- Modern healthcare illustration with medical professionals -->
+                        <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" alt="Healthcare professional using tablet technology" class="rounded-2xl shadow-2xl w-full h-auto" />
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: Hero -->
+
+        <!-- @COMPONENT: SymptomChecker [symptom input and analysis] -->
+        <section id="symptoms" class="py-16 lg:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                        AI Symptom Checker
+                    </h2>
+                    <p class="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+                        Describe your symptoms and get AI-powered insights to help guide your next steps.
+                    </p>
+                </div>
+                
+                <div class="max-w-4xl mx-auto">
+                    <div class="bg-card rounded-lg border border-border shadow-lg p-6 lg:p-8">
+                        <!-- @STATE: symptoms:string = '', isAnalyzing:boolean = false, results:object = null -->
+                        <form class="space-y-6" data-event="submit:handleSymptomSubmit">
+                            <div class="space-y-4">
+                                <label for="symptoms" class="text-sm font-medium text-foreground">
+                                    Describe your symptoms
+                                </label>
+                                <textarea 
+                                    id="symptoms" 
+                                    class="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                                    placeholder="Please describe your symptoms in detail. For example: 'I have had a headache for 2 days, along with nausea and sensitivity to light...'"
+                                    data-bind="symptoms"
+                                    data-mock="true"
+                                    required
+                                ></textarea>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="age" class="text-sm font-medium text-foreground">Age</label>
+                                    <input 
+                                        type="number" 
+                                        id="age" 
+                                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        placeholder="25"
+                                        data-bind="age"
+                                        data-mock="true"
+                                    >
+                                </div>
+                                <div>
+                                    <label for="gender" class="text-sm font-medium text-foreground">Gender</label>
+                                    <select 
+                                        id="gender" 
+                                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        data-bind="gender"
+                                    >
+                                        <option value="">Select gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="duration" class="text-sm font-medium text-foreground">Duration</label>
+                                    <select 
+                                        id="duration" 
+                                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        data-bind="duration"
+                                    >
+                                        <option value="">How long?</option>
+                                        <option value="hours">Few hours</option>
+                                        <option value="1-2days">1-2 days</option>
+                                        <option value="3-7days">3-7 days</option>
+                                        <option value="1-2weeks">1-2 weeks</option>
+                                        <option value="longer">Longer than 2 weeks</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button 
+                                type="submit" 
+                                class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8 py-3"
+                                data-implementation="Should validate form and call symptom analysis API"
+                            >
+                                <i class="fas fa-search mr-2"></i>
+                                Analyze Symptoms
+                            </button>
+                        </form>
+                        
+                        <!-- Results Panel (hidden by default) -->
+                        <!-- @STATE: showResults:boolean = false -->
+                        <div class="mt-8 p-6 bg-muted rounded-lg border border-border fade-in" style="display: none;" data-bind="showResults">
+                            <h3 class="text-lg font-semibold text-foreground mb-4">Analysis Results</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-2 h-2 bg-destructive rounded-full mt-2 flex-shrink-0"></div>
+                                    <div>
+                                        <h4 class="font-medium text-foreground" data-mock="true">Possible Migraine</h4>
+                                        <p class="text-sm text-muted-foreground" data-mock="true">
+                                            Based on your symptoms, you may be experiencing a migraine. The combination of headache, nausea, and light sensitivity are common indicators.
+                                        </p>
+                                        <div class="mt-2">
+                                            <span class="inline-flex items-center rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive">
+                                                Confidence: 85%
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 p-4 bg-background rounded-md border border-border">
+                                    <h4 class="font-medium text-foreground mb-2">Recommended Actions</h4>
+                                    <ul class="text-sm text-muted-foreground space-y-1">
+                                        <li data-mock="true">• Rest in a dark, quiet room</li>
+                                        <li data-mock="true">• Stay hydrated</li>
+                                        <li data-mock="true">• Consider over-the-counter pain relief</li>
+                                        <li data-mock="true">• If symptoms persist or worsen, consult a healthcare professional</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: SymptomChecker -->
+
+        <!-- @COMPONENT: AIChat [consultation chat interface] -->
+        <section id="chat" class="py-16 lg:py-24 bg-muted/30">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                        AI Health Consultation
+                    </h2>
+                    <p class="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+                        Chat with our AI assistant for personalized health guidance and follow-up questions.
+                    </p>
+                </div>
+                
+                <div class="max-w-4xl mx-auto">
+                    <div class="bg-card rounded-lg border border-border shadow-lg overflow-hidden">
+                        <!-- Chat Header -->
+                        <div class="bg-primary px-6 py-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-primary-foreground/20 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-robot text-primary-foreground"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-primary-foreground" data-mock="true">HealthLink AI Assistant</h3>
+                                    <p class="text-sm text-primary-foreground/80" data-mock="true">Online • Ready to help</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat Messages -->
+                        <!-- @STATE: messages:array = [], isTyping:boolean = false -->
+                        <div class="h-96 overflow-y-auto p-6 space-y-4" id="chatContainer">
+                            <!-- AI Welcome Message -->
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-robot text-accent-foreground text-sm"></i>
+                                </div>
+                                <div class="chat-bubble-ai rounded-lg px-4 py-2 max-w-[80%]">
+                                    <p class="text-sm" data-mock="true">
+                                        Hello! I'm your AI health assistant. I can help answer questions about your symptoms, provide general health information, and guide you to appropriate care. How can I help you today?
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- User Message Example -->
+                            <div class="flex items-start space-x-3 justify-end">
+                                <div class="chat-bubble-user rounded-lg px-4 py-2 max-w-[80%]">
+                                    <p class="text-sm" data-mock="true">
+                                        I've been having trouble sleeping lately. What could be causing this?
+                                    </p>
+                                </div>
+                                <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-user text-primary-foreground text-sm"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- AI Response -->
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-robot text-accent-foreground text-sm"></i>
+                                </div>
+                                <div class="chat-bubble-ai rounded-lg px-4 py-2 max-w-[80%]">
+                                    <p class="text-sm" data-mock="true">
+                                        Sleep troubles can have many causes. Common factors include stress, caffeine intake, screen time before bed, irregular sleep schedule, or underlying health conditions. Can you tell me more about your sleep patterns and any recent changes in your routine?
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Typing Indicator (hidden by default) -->
+                            <div class="flex items-start space-x-3" style="display: none;" data-bind="isTyping">
+                                <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-robot text-accent-foreground text-sm"></i>
+                                </div>
+                                <div class="chat-bubble-ai rounded-lg px-4 py-2">
+                                    <div class="flex space-x-1">
+                                        <div class="w-2 h-2 bg-muted-foreground rounded-full loading-dots"></div>
+                                        <div class="w-2 h-2 bg-muted-foreground rounded-full loading-dots"></div>
+                                        <div class="w-2 h-2 bg-muted-foreground rounded-full loading-dots"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat Input -->
+                        <div class="border-t border-border p-4">
+                            <form class="flex space-x-2" data-event="submit:handleChatSubmit">
+                                <input 
+                                    type="text" 
+                                    class="flex-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    placeholder="Type your health question here..."
+                                    data-bind="chatInput"
+                                    data-mock="true"
+                                >
+                                <button 
+                                    type="submit" 
+                                    class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4"
+                                    data-implementation="Should send message and get AI response"
+                                >
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: AIChat -->
+
+        <!-- @COMPONENT: ClinicFinder [Google Maps integration for finding nearby clinics] -->
+        <section id="clinics" class="py-16 lg:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                        Find Nearby Clinics
+                    </h2>
+                    <p class="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+                        Locate healthcare facilities near you with integrated maps and detailed information.
+                    </p>
+                </div>
+                
+                <div class="grid gap-8 lg:grid-cols-3">
+                    <!-- Search and Filters -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-card rounded-lg border border-border shadow-lg p-6 space-y-6">
+                            <h3 class="text-lg font-semibold text-foreground">Search Filters</h3>
+                            
+                            <!-- Location Input -->
+                            <div class="space-y-2">
+                                <label for="location" class="text-sm font-medium text-foreground">Location</label>
+                                <div class="relative">
+                                    <input 
+                                        type="text" 
+                                        id="location" 
+                                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        placeholder="Enter your location"
+                                        data-bind="location"
+                                        data-mock="true"
+                                    >
+                                    <i class="fas fa-map-marker-alt absolute left-3 top-3 text-muted-foreground"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Clinic Type -->
+                            <div class="space-y-2">
+                                <label for="clinicType" class="text-sm font-medium text-foreground">Clinic Type</label>
+                                <select 
+                                    id="clinicType" 
+                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    data-bind="clinicType"
+                                >
+                                    <option value="">All Types</option>
+                                    <option value="general">General Practice</option>
+                                    <option value="urgent">Urgent Care</option>
+                                    <option value="specialist">Specialist</option>
+                                    <option value="hospital">Hospital</option>
+                                    <option value="pharmacy">Pharmacy</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Distance -->
+                            <div class="space-y-2">
+                                <label for="distance" class="text-sm font-medium text-foreground">Distance</label>
+                                <select 
+                                    id="distance" 
+                                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    data-bind="distance"
+                                >
+                                    <option value="5">Within 5 miles</option>
+                                    <option value="10" selected>Within 10 miles</option>
+                                    <option value="25">Within 25 miles</option>
+                                    <option value="50">Within 50 miles</option>
+                                </select>
+                            </div>
+                            
+                            <button 
+                                class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                                data-event="click:handleClinicSearch"
+                                data-implementation="Should search for clinics using Google Maps API"
+                            >
+                                <i class="fas fa-search mr-2"></i>
+                                Search Clinics
+                            </button>
+                        </div>
+                        
+                        <!-- Clinic Results List -->
+                        <!-- @STATE: clinics:array = [] -->
+                        <div class="mt-6 space-y-4">
+                            <!-- @MAP: clinics.map(clinic => ( -->
+                            <div class="bg-card rounded-lg border border-border shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer" data-mock="true">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-medium text-foreground" data-mock="true">City Medical Center</h4>
+                                    <span class="text-sm text-muted-foreground" data-mock="true">0.8 mi</span>
+                                </div>
+                                <p class="text-sm text-muted-foreground mb-2" data-mock="true">123 Main Street, Downtown</p>
+                                <div class="flex items-center space-x-4 text-sm">
+                                    <div class="flex items-center space-x-1">
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <span data-mock="true">4.2</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1 text-accent">
+                                        <i class="fas fa-clock"></i>
+                                        <span data-mock="true">Open until 8 PM</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-card rounded-lg border border-border shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer" data-mock="true">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-medium text-foreground" data-mock="true">QuickCare Urgent Care</h4>
+                                    <span class="text-sm text-muted-foreground" data-mock="true">1.2 mi</span>
+                                </div>
+                                <p class="text-sm text-muted-foreground mb-2" data-mock="true">456 Oak Avenue, Midtown</p>
+                                <div class="flex items-center space-x-4 text-sm">
+                                    <div class="flex items-center space-x-1">
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <span data-mock="true">4.7</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1 text-accent">
+                                        <i class="fas fa-clock"></i>
+                                        <span data-mock="true">Open 24/7</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-card rounded-lg border border-border shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer" data-mock="true">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-medium text-foreground" data-mock="true">Family Health Partners</h4>
+                                    <span class="text-sm text-muted-foreground" data-mock="true">2.1 mi</span>
+                                </div>
+                                <p class="text-sm text-muted-foreground mb-2" data-mock="true">789 Pine Street, Westside</p>
+                                <div class="flex items-center space-x-4 text-sm">
+                                    <div class="flex items-center space-x-1">
+                                        <i class="fas fa-star text-yellow-500"></i>
+                                        <span data-mock="true">4.5</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1 text-destructive">
+                                        <i class="fas fa-clock"></i>
+                                        <span data-mock="true">Closes at 5 PM</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                    
+                    <!-- Map Container -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-card rounded-lg border border-border shadow-lg overflow-hidden h-[600px]">
+                            <!-- @FUNCTIONALITY: This map should integrate with Google Maps API to show real clinic locations -->
+                            <div class="w-full h-full bg-muted flex items-center justify-center relative">
+                                <!-- Placeholder for Google Maps -->
+                                <div class="text-center space-y-4">
+                                    <i class="fas fa-map text-4xl text-muted-foreground"></i>
+                                    <div>
+                                        <h3 class="text-lg font-medium text-foreground" data-mock="true">Interactive Map</h3>
+                                        <p class="text-sm text-muted-foreground" data-mock="true">Google Maps integration will display clinic locations</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Mock Map Markers -->
+                                <div class="absolute top-1/4 left-1/3 w-6 h-6 bg-destructive rounded-full flex items-center justify-center shadow-lg" data-mock="true">
+                                    <i class="fas fa-hospital-alt text-white text-xs"></i>
+                                </div>
+                                <div class="absolute top-1/2 right-1/3 w-6 h-6 bg-primary rounded-full flex items-center justify-center shadow-lg" data-mock="true">
+                                    <i class="fas fa-plus-circle text-white text-xs"></i>
+                                </div>
+                                <div class="absolute bottom-1/3 left-1/2 w-6 h-6 bg-accent rounded-full flex items-center justify-center shadow-lg" data-mock="true">
+                                    <i class="fas fa-user-md text-white text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: ClinicFinder -->
+
+        <!-- @COMPONENT: HealthLogs [health data tracking and visualization] -->
+        <section id="logs" class="py-16 lg:py-24 bg-muted/30">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                        Health Logs & Tracking
+                    </h2>
+                    <p class="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+                        Track your symptoms, medications, and health metrics over time to identify patterns.
+                    </p>
+                </div>
+                
+                <div class="grid gap-8 lg:grid-cols-3">
+                    <!-- Add New Log Entry -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-card rounded-lg border border-border shadow-lg p-6 space-y-6">
+                            <h3 class="text-lg font-semibold text-foreground">Add Health Log Entry</h3>
+                            
+                            <form class="space-y-4" data-event="submit:handleLogSubmit">
+                                <div class="space-y-2">
+                                    <label for="logType" class="text-sm font-medium text-foreground">Log Type</label>
+                                    <select 
+                                        id="logType" 
+                                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        data-bind="logType"
+                                    >
+                                        <option value="">Select type</option>
+                                        <option value="symptoms">Symptoms</option>
+                                        <option value="medication">Medication</option>
+                                        <option value="vitals">Vital Signs</option>
+                                        <option value="exercise">Exercise</option>
+                                        <option value="mood">Mood</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <label for="logDate" class="text-sm font-medium text-foreground">Date</label>
+                                    <input 
+                                        type="date" 
+                                        id="logDate" 
+                                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        data-bind="logDate"
+                                    >
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <label for="logDescription" class="text-sm font-medium text-foreground">Description</label>
+                                    <textarea 
+                                        id="logDescription" 
+                                        class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        placeholder="Describe your symptoms, medication taken, or other health details..."
+                                        data-bind="logDescription"
+                                    ></textarea>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <label for="severity" class="text-sm font-medium text-foreground">Severity (1-10)</label>
+                                    <input 
+                                        type="range" 
+                                        id="severity" 
+                                        min="1" 
+                                        max="10" 
+                                        value="5" 
+                                        class="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+                                        data-bind="severity"
+                                    >
+                                    <div class="flex justify-between text-xs text-muted-foreground">
+                                        <span>Mild</span>
+                                        <span>Moderate</span>
+                                        <span>Severe</span>
+                                    </div>
+                                </div>
+                                
+                                <button 
+                                    type="submit" 
+                                    class="w-full inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                                    data-implementation="Should save log entry to database"
+                                >
+                                    <i class="fas fa-plus mr-2"></i>
+                                    Add Log Entry
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Logs and Charts -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Chart Visualization -->
+                        <div class="bg-card rounded-lg border border-border shadow-lg p-6">
+                            <h3 class="text-lg font-semibold text-foreground mb-4">Symptom Trends (Last 30 Days)</h3>
+                            <!-- @FUNCTIONALITY: This should display a chart showing symptom patterns over time -->
+                            <div class="h-64 bg-muted rounded-lg flex items-center justify-center">
+                                <div class="text-center space-y-2">
+                                    <i class="fas fa-chart-line text-3xl text-muted-foreground"></i>
+                                    <p class="text-sm text-muted-foreground" data-mock="true">Chart visualization will show symptom trends</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recent Log Entries -->
+                        <div class="bg-card rounded-lg border border-border shadow-lg p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-foreground">Recent Entries</h3>
+                                <button class="text-sm text-primary hover:text-primary/80">View All</button>
+                            </div>
+                            
+                            <!-- @STATE: logs:array = [] -->
+                            <div class="space-y-4">
+                                <!-- @MAP: logs.slice(0, 5).map(log => ( -->
+                                <div class="flex items-start space-x-4 p-4 bg-muted/50 rounded-lg" data-mock="true">
+                                    <div class="w-10 h-10 bg-destructive/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-thermometer-half text-destructive"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <h4 class="text-sm font-medium text-foreground" data-mock="true">Headache</h4>
+                                            <span class="text-xs text-muted-foreground" data-mock="true">Today, 2:30 PM</span>
+                                        </div>
+                                        <p class="text-sm text-muted-foreground" data-mock="true">
+                                            Mild headache after working on computer for 4 hours. Took ibuprofen.
+                                        </p>
+                                        <div class="mt-2 flex items-center space-x-2">
+                                            <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
+                                                Severity: 4/10
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start space-x-4 p-4 bg-muted/50 rounded-lg" data-mock="true">
+                                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-pills text-primary"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <h4 class="text-sm font-medium text-foreground" data-mock="true">Medication</h4>
+                                            <span class="text-xs text-muted-foreground" data-mock="true">Yesterday, 8:00 AM</span>
+                                        </div>
+                                        <p class="text-sm text-muted-foreground" data-mock="true">
+                                            Took daily vitamin D supplement (1000 IU) with breakfast.
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start space-x-4 p-4 bg-muted/50 rounded-lg" data-mock="true">
+                                    <div class="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-heart text-accent"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <h4 class="text-sm font-medium text-foreground" data-mock="true">Exercise</h4>
+                                            <span class="text-xs text-muted-foreground" data-mock="true">2 days ago</span>
+                                        </div>
+                                        <p class="text-sm text-muted-foreground" data-mock="true">
+                                            30-minute walk in the park. Felt energized afterwards.
+                                        </p>
+                                        <div class="mt-2 flex items-center space-x-2">
+                                            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                                                Energy: 8/10
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- @END_MAP )) -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: HealthLogs -->
+
+        <!-- @COMPONENT: Features [key features overview] -->
+        <section class="py-16 lg:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                        Comprehensive Health Management
+                    </h2>
+                    <p class="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+                        Everything you need to manage your health in one intelligent platform.
+                    </p>
+                </div>
+                
+                <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="text-center">
+                        <div class="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                            <i class="fas fa-brain text-2xl text-primary"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-foreground mb-2">AI-Powered Analysis</h3>
+                        <p class="text-muted-foreground">
+                            Advanced machine learning algorithms analyze your symptoms and provide intelligent health insights.
+                        </p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="mx-auto h-16 w-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
+                            <i class="fas fa-map-marked-alt text-2xl text-accent"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-foreground mb-2">Clinic Location</h3>
+                        <p class="text-muted-foreground">
+                            Find nearby healthcare facilities with real-time availability and integrated maps.
+                        </p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="mx-auto h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+                            <i class="fas fa-chart-bar text-2xl text-destructive"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-foreground mb-2">Health Tracking</h3>
+                        <p class="text-muted-foreground">
+                            Monitor symptoms, medications, and health metrics to identify patterns over time.
+                        </p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="mx-auto h-16 w-16 rounded-full bg-yellow-500/10 flex items-center justify-center mb-4">
+                            <i class="fas fa-comments text-2xl text-yellow-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-foreground mb-2">24/7 AI Chat</h3>
+                        <p class="text-muted-foreground">
+                            Get instant answers to health questions from our intelligent AI assistant.
+                        </p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="mx-auto h-16 w-16 rounded-full bg-purple-500/10 flex items-center justify-center mb-4">
+                            <i class="fas fa-shield-alt text-2xl text-purple-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-foreground mb-2">Privacy First</h3>
+                        <p class="text-muted-foreground">
+                            Your health data is encrypted and secure, with full control over your privacy settings.
+                        </p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="mx-auto h-16 w-16 rounded-full bg-blue-500/10 flex items-center justify-center mb-4">
+                            <i class="fas fa-mobile-alt text-2xl text-blue-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-foreground mb-2">Mobile Optimized</h3>
+                        <p class="text-muted-foreground">
+                            Access your health information anywhere with our responsive mobile-first design.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: Features -->
+    </main>
+
+    <!-- @COMPONENT: Footer [site links and information] -->
+    <footer class="bg-card border-t border-border">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-heartbeat text-2xl text-primary"></i>
+                        <span class="text-xl font-bold text-foreground">HealthLink AI</span>
+                    </div>
+                    <p class="text-sm text-muted-foreground max-w-xs">
+                        Your intelligent health companion for better wellness management and healthcare access.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-muted-foreground hover:text-foreground">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-muted-foreground hover:text-foreground">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="#" class="text-muted-foreground hover:text-foreground">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-sm font-semibold text-foreground mb-4">Features</h3>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li><a href="#symptoms" class="hover:text-foreground">Symptom Checker</a></li>
+                        <li><a href="#chat" class="hover:text-foreground">AI Consultation</a></li>
+                        <li><a href="#clinics" class="hover:text-foreground">Find Clinics</a></li>
+                        <li><a href="#logs" class="hover:text-foreground">Health Logs</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-sm font-semibold text-foreground mb-4">Company</h3>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li><a href="#" class="hover:text-foreground">About Us</a></li>
+                        <li><a href="#" class="hover:text-foreground">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-foreground">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-foreground">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-sm font-semibold text-foreground mb-4">Support</h3>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li><a href="#" class="hover:text-foreground">Help Center</a></li>
+                        <li><a href="#" class="hover:text-foreground">Documentation</a></li>
+                        <li><a href="#" class="hover:text-foreground">Community</a></li>
+                        <li><a href="#" class="hover:text-foreground">Status</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center">
+                <p class="text-sm text-muted-foreground">
+                    © 2024 HealthLink AI. All rights reserved.
+                </p>
+                <p class="text-xs text-muted-foreground mt-2 md:mt-0">
+                    Medical disclaimer: This platform provides general health information and should not replace professional medical advice.
+                </p>
+            </div>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: Footer -->
+
+    <script>
+    // TODO: Implement business logic, API calls, and state management
+    (function() {
+        'use strict';
+        
+        // Mock data and state management
+        let appState = {
+            symptoms: '',
+            chatMessages: [],
+            healthLogs: [],
+            isAnalyzing: false,
+            isTyping: false,
+            showResults: false
+        };
+        
+        // Utility functions
+        function showElement(element) {
+            element.style.display = 'block';
+            element.classList.add('fade-in');
+        }
+        
+        function hideElement(element) {
+            element.style.display = 'none';
+        }
+        
+        // Mock symptom analysis
+        function analyzeSymptoms(symptoms, age, gender, duration) {
+            // TODO: Integrate with Infermedica or Hugging Face API
+            console.log('Analyzing symptoms:', { symptoms, age, gender, duration });
+            
+            // Mock API response
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve({
+                        condition: 'Possible Migraine',
+                        confidence: 85,
+                        description: 'Based on your symptoms, you may be experiencing a migraine.',
+                        recommendations: [
+                            'Rest in a dark, quiet room',
+                            'Stay hydrated',
+                            'Consider over-the-counter pain relief',
+                            'If symptoms persist or worsen, consult a healthcare professional'
+                        ]
+                    });
+                }, 2000);
+            });
+        }
+        
+        // Mock AI chat response
+        function getAIChatResponse(message) {
+            // TODO: Integrate with AI chat API
+            console.log('Getting AI response for:', message);
+            
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const responses = [
+                        "That's a great question about your health. Based on what you've described, here are some general considerations...",
+                        "I understand your concern. Let me provide some helpful information that might address your question...",
+                        "Thank you for sharing those details. Here's what I can tell you about this health topic..."
+                    ];
+                    
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    resolve(randomResponse);
+                }, 1500);
+            });
+        }
+        
+        // Mock clinic search
+        function searchClinics(location, type, distance) {
+            // TODO: Integrate with Google Maps API
+            console.log('Searching clinics:', { location, type, distance });
+            
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve([
+                        {
+                            name: 'City Medical Center',
+                            address: '123 Main Street, Downtown',
+                            distance: '0.8 mi',
+                            rating: 4.2,
+                            hours: 'Open until 8 PM',
+                            type: 'General Practice'
+                        },
+                        {
+                            name: 'QuickCare Urgent Care',
+                            address: '456 Oak Avenue, Midtown',
+                            distance: '1.2 mi',
+                            rating: 4.7,
+                            hours: 'Open 24/7',
+                            type: 'Urgent Care'
+                        }
+                    ]);
+                }, 1000);
+            });
+        }
+        
+        // Event handlers would be implemented here
+        // TODO: Add form submission handlers
+        // TODO: Add chat functionality
+        // TODO: Add clinic search handlers
+        // TODO: Add health log management
+        
+        console.log('HealthLink AI initialized');
+    })();
+    </script>
+</body>
+</html>
