@@ -1,0 +1,24 @@
+### Core Features:
+1. **Symptom Checker** – integrate with a medical API (Infermedica or open-source Hugging Face models) for early risk detection of diseases (cancer, diabetes, hypertension, etc.).  
+2. **Image Analysis** – allow users to upload a photo of a wound/skin condition and get possible diagnoses (use a pretrained vision model like Google’s Mediapipe or Hugging Face vision models).  
+3. **Chatbot Assistant** – integrate multiple LLMs (ChatGPT, Gemini, Perplexity, Meta AI) with plugin-style architecture so users can ask health questions and get accurate responses.  
+4. **Chronic Disease Support** – medication reminders (via Twilio/WhatsApp), appointment scheduling, progress tracking (blood pressure, glucose, chemo).  
+5. **Wellness & Prevention** – nutrition tips, plant-based remedies, lifestyle suggestions based on user’s location, weather, and environment.  
+6. **Smart Notifications** – e.g., remind users to wear jackets in cold weather, alert about free checkups nearby, or warn of pollution/smog levels.  
+7. **Location Services** – integrate Google Maps API to show nearest hospitals, pharmacies, or free health camp events.  
+8. **Payments Integration** – support multiple methods (Mpesa, PayPal, Stripe) for teleconsultations or medicine delivery.  
+
+### Tech Stack:
+- **Frontend**: React + Tailwind CSS (mobile-first UI)  
+- **Backend**: Flask or FastAPI + MySQL/PostgreSQL  
+- **AI Models**: Hugging Face (symptom checker + vision + sentiment), OpenAI GPT, Google Gemini, Meta LLaMA  
+- **Integrations**: Twilio/WhatsApp API, Google Maps API, Weather API, Payment APIs (Stripe, Mpesa)  
+- **Visualization**: Chart.js or D3.js for health trend graphs  
+
+### Requirements:
+- Modular plugin-based AI “brain” where features can be swapped/extended easily.  
+- Secure authentication (JWT or OAuth).  
+- Clean, production-ready code with documentation and comments.  
+- Scalable architecture for future partnerships with NGOs, USAID, and health organizations.  
+
+Generate the **initial codebase** with boilerplate setup, integrations, and modular architecture so 
